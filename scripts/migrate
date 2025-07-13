@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+migrate -database "sqlite3://db/sqlite/content-api.db" -path db/sqlite/migrations up

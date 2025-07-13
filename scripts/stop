@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# Kill server by command name
+pkill -f "go run main.go"
+# Kill server by port
+SERVER_PID=$(lsof -i :8888 | tail -n 1 | awk '{print $2}')
+if [ -n "$SERVER_PID" ]; then
+    kill $SERVER_PID
+fi
