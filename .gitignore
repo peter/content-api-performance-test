@@ -1,7 +1,10 @@
 db/sqlite/content-api.db*
 scripts/smoke-test/*.json
+scripts/performance-test/*.jsonl
 
 log.json
+
+node_modules
 
 # Binaries for programs and plugins
 *.exe

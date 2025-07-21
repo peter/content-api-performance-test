@@ -8,10 +8,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
-
-	"github.com/seenthis-ab/content-api/config"
 )
 
 // TestContent represents the content structure for API calls
@@ -28,37 +27,99 @@ type APIResponse map[string]interface{}
 
 // TestResult holds the result of a single test operation
 type TestResult struct {
-	Operation string
-	ID        string
-	Status    int
-	Duration  time.Duration
-	Error     error
+	Operation string        `json:"operation"`
+	ID        string        `json:"id"`
+	Status    int           `json:"status"`
+	Duration  time.Duration `json:"duration_ns"`
+	Error     string        `json:"error,omitempty"`
+	Timestamp time.Time     `json:"timestamp"`
+}
+
+// TestSummary holds the summary of all test results
+type TestSummary struct {
+	Timestamp       time.Time                `json:"timestamp"`
+	BaseURL         string                   `json:"base_url"`
+	Iterations      int                      `json:"iterations"`
+	Parallel        int                      `json:"parallel"`
+	TotalOperations int                      `json:"total_operations"`
+	TotalSuccess    int                      `json:"total_success"`
+	TotalFailures   int                      `json:"total_failures"`
+	SuccessRate     float64                  `json:"success_rate"`
+	ElapsedTimeMs   int64                    `json:"elapsed_time_ms"`
+	Operations      map[string]OperationStat `json:"operations"`
+}
+
+// OperationStat holds statistics for a specific operation type
+type OperationStat struct {
+	Count       int           `json:"count"`
+	Success     int           `json:"success"`
+	Failures    int           `json:"failures"`
+	AvgDuration time.Duration `json:"avg_duration_ns"`
+	MinDuration time.Duration `json:"min_duration_ns"`
+	MaxDuration time.Duration `json:"max_duration_ns"`
+	SuccessRate float64       `json:"success_rate"`
 }
 
 // SmokeTest performs CRUD operations in parallel
 type SmokeTest struct {
-	baseURL    string
-	httpClient *http.Client
-	results    chan TestResult
-	wg         sync.WaitGroup
-	semaphore  chan struct{} // semaphore for limiting concurrency
+	baseURL     string
+	httpClient  *http.Client
+	results     chan TestResult
+	wg          sync.WaitGroup
+	semaphore   chan struct{} // semaphore for limiting concurrency
+	resultsFile *os.File
+	resultsPath string
+	fileMutex   sync.Mutex
+	iterations  int
+	parallel    int
 }
 
 // NewSmokeTest creates a new smoke test instance
-func NewSmokeTest(baseURL string, parallel int) *SmokeTest {
+func NewSmokeTest(baseURL string, parallel int, resultsFilePath string) *SmokeTest {
+	// Create results file
+	resultsFile, err := os.OpenFile(resultsFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Printf("Warning: Could not open results file: %v", err)
+		resultsFile = nil
+	}
+
 	return &SmokeTest{
 		baseURL: baseURL,
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
-		results:   make(chan TestResult, 1000), // Buffer for results
-		semaphore: make(chan struct{}, parallel),
+		results:     make(chan TestResult, 1000), // Buffer for results
+		semaphore:   make(chan struct{}, parallel),
+		resultsFile: resultsFile,
+		resultsPath: resultsFilePath,
+		parallel:    parallel,
 	}
 }
 
 // acquire and release helpers
 func (st *SmokeTest) acquire() { st.semaphore <- struct{}{} }
 func (st *SmokeTest) release() { <-st.semaphore }
+
+// writeSummaryToFile writes the test summary as a JSON line to the results file
+func (st *SmokeTest) writeSummaryToFile(summary TestSummary) {
+	if st.resultsFile == nil {
+		return
+	}
+
+	st.fileMutex.Lock()
+	defer st.fileMutex.Unlock()
+
+	jsonData, err := json.Marshal(summary)
+	if err != nil {
+		log.Printf("Error marshaling summary to JSON: %v", err)
+		return
+	}
+
+	_, err = st.resultsFile.Write(append(jsonData, '\n'))
+	if err != nil {
+		log.Printf("Error writing to results file: %v", err)
+	}
+}
 
 // createContent creates a new content item
 func (st *SmokeTest) createContent(ctx context.Context, id int) {
@@ -86,7 +147,8 @@ func (st *SmokeTest) createContent(ctx context.Context, id int) {
 			ID:        fmt.Sprintf("%d", id),
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to marshal content: %w", err),
+			Error:     fmt.Errorf("failed to marshal content: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -98,7 +160,8 @@ func (st *SmokeTest) createContent(ctx context.Context, id int) {
 			ID:        fmt.Sprintf("%d", id),
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to create request: %w", err),
+			Error:     fmt.Errorf("failed to create request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -112,7 +175,8 @@ func (st *SmokeTest) createContent(ctx context.Context, id int) {
 			ID:        fmt.Sprintf("%d", id),
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to execute request: %w", err),
+			Error:     fmt.Errorf("failed to execute request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -125,7 +189,8 @@ func (st *SmokeTest) createContent(ctx context.Context, id int) {
 			ID:        fmt.Sprintf("%d", id),
 			Status:    resp.StatusCode,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to decode response: %w", err),
+			Error:     fmt.Errorf("failed to decode response: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -135,7 +200,8 @@ func (st *SmokeTest) createContent(ctx context.Context, id int) {
 		ID:        apiResp["id"].(string), // Assuming ID is always a string in the new APIResponse
 		Status:    resp.StatusCode,
 		Duration:  time.Since(start),
-		Error:     nil,
+		Error:     "",
+		Timestamp: time.Now(),
 	}
 
 	// If creation was successful, perform READ, UPDATE, DELETE operations in sequence
@@ -145,11 +211,11 @@ func (st *SmokeTest) createContent(ctx context.Context, id int) {
 			// READ first
 			st.readContent(ctx, apiResp["id"].(string))
 			// Small delay to ensure READ completes
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(5 * time.Millisecond)
 			// UPDATE second
 			st.updateContent(ctx, apiResp["id"].(string))
 			// Small delay to ensure UPDATE completes
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(5 * time.Millisecond)
 			// DELETE last
 			st.deleteContent(ctx, apiResp["id"].(string))
 		}()
@@ -171,7 +237,8 @@ func (st *SmokeTest) readContent(ctx context.Context, id string) {
 			ID:        id,
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to create request: %w", err),
+			Error:     fmt.Errorf("failed to create request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -183,7 +250,8 @@ func (st *SmokeTest) readContent(ctx context.Context, id string) {
 			ID:        id,
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to execute request: %w", err),
+			Error:     fmt.Errorf("failed to execute request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -194,7 +262,8 @@ func (st *SmokeTest) readContent(ctx context.Context, id string) {
 		ID:        id,
 		Status:    resp.StatusCode,
 		Duration:  time.Since(start),
-		Error:     nil,
+		Error:     "",
+		Timestamp: time.Now(),
 	}
 }
 
@@ -224,12 +293,13 @@ func (st *SmokeTest) updateContent(ctx context.Context, id string) {
 			ID:        id,
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to marshal update data: %w", err),
+			Error:     fmt.Errorf("failed to marshal update data: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
 
-	fmt.Println("Updating content", id, string(jsonData))
+	// fmt.Println("Updating content", id, string(jsonData))
 
 	req, err := http.NewRequestWithContext(ctx, "PUT", st.baseURL+"/content/"+id, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -238,7 +308,8 @@ func (st *SmokeTest) updateContent(ctx context.Context, id string) {
 			ID:        id,
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to create request: %w", err),
+			Error:     fmt.Errorf("failed to create request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -252,7 +323,8 @@ func (st *SmokeTest) updateContent(ctx context.Context, id string) {
 			ID:        id,
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to execute request: %w", err),
+			Error:     fmt.Errorf("failed to execute request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -271,7 +343,8 @@ func (st *SmokeTest) updateContent(ctx context.Context, id string) {
 		ID:        id,
 		Status:    resp.StatusCode,
 		Duration:  time.Since(start),
-		Error:     nil,
+		Error:     "",
+		Timestamp: time.Now(),
 	}
 }
 
@@ -290,7 +363,8 @@ func (st *SmokeTest) deleteContent(ctx context.Context, id string) {
 			ID:        id,
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to create request: %w", err),
+			Error:     fmt.Errorf("failed to create request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -302,7 +376,8 @@ func (st *SmokeTest) deleteContent(ctx context.Context, id string) {
 			ID:        id,
 			Status:    0,
 			Duration:  time.Since(start),
-			Error:     fmt.Errorf("failed to execute request: %w", err),
+			Error:     fmt.Errorf("failed to execute request: %w", err).Error(),
+			Timestamp: time.Now(),
 		}
 		return
 	}
@@ -313,7 +388,8 @@ func (st *SmokeTest) deleteContent(ctx context.Context, id string) {
 		ID:        id,
 		Status:    resp.StatusCode,
 		Duration:  time.Since(start),
-		Error:     nil,
+		Error:     "",
+		Timestamp: time.Now(),
 	}
 }
 
@@ -322,6 +398,8 @@ func (st *SmokeTest) Run(numIterations int) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
+	st.iterations = numIterations
+	startTime := time.Now()
 	log.Printf("Starting smoke test with %d iterations...", numIterations)
 
 	// Start result collector
@@ -351,9 +429,9 @@ func (st *SmokeTest) Run(numIterations int) {
 		stats.count++
 		stats.totalDur += result.Duration
 
-		if result.Error != nil || result.Status >= 400 {
+		if result.Error != "" {
 			stats.failures++
-			log.Printf("FAILURE: %s %s - Status: %d, Error: %v", result.Operation, result.ID, result.Status, result.Error)
+			log.Printf("FAILURE: %s %s - Status: %d, Error: %s", result.Operation, result.ID, result.Status, result.Error)
 		} else {
 			stats.success++
 		}
@@ -395,20 +473,59 @@ func (st *SmokeTest) Run(numIterations int) {
 	} else {
 		log.Printf("FAILURE: %d operations failed", totalFailures)
 	}
+
+	// Create summary
+	elapsedTime := time.Since(startTime)
+	summary := TestSummary{
+		Timestamp:       time.Now(),
+		BaseURL:         st.baseURL,
+		Iterations:      st.iterations,
+		Parallel:        st.parallel,
+		TotalOperations: totalOperations,
+		TotalSuccess:    totalSuccess,
+		TotalFailures:   totalFailures,
+		SuccessRate:     float64(totalSuccess) / float64(totalOperations),
+		ElapsedTimeMs:   elapsedTime.Milliseconds(),
+		Operations:      make(map[string]OperationStat),
+	}
+
+	// Add operation statistics to summary
+	for op, stats := range operationStats {
+		avgDur := time.Duration(0)
+		if stats.count > 0 {
+			avgDur = stats.totalDur / time.Duration(stats.count)
+		}
+
+		summary.Operations[op] = OperationStat{
+			Count:       stats.count,
+			Success:     stats.success,
+			Failures:    stats.failures,
+			AvgDuration: avgDur,
+			MinDuration: stats.minDur,
+			MaxDuration: stats.maxDur,
+			SuccessRate: float64(stats.success) / float64(stats.count),
+		}
+	}
+
+	// Write summary to file
+	st.writeSummaryToFile(summary)
+
+	// Close results file
+	if st.resultsFile != nil {
+		st.resultsFile.Close()
+		log.Printf("Results written to %s", st.resultsPath)
+	}
 }
 
 func main() {
 	var (
-		baseURL    = flag.String("url", "http://localhost:8888", "Base URL of the API")
-		iterations = flag.Int("n", 10, "Number of iterations to run")
-		parallel   = flag.Int("parallel", 10, "Maximum number of parallel API calls")
+		baseURL     = flag.String("url", "http://localhost:8888", "Base URL of the API")
+		iterations  = flag.Int("n", 10, "Number of iterations to run")
+		parallel    = flag.Int("parallel", 10, "Maximum number of parallel API calls")
+		resultsFile = flag.String("results", "scripts/performance-test/test-results.jsonl", "Path to results JSONL file")
 	)
 	flag.Parse()
 
-	// Load config to show which database is being used
-	dbConfig := config.LoadDatabaseConfig()
-	log.Printf("Using database: %s", dbConfig.GetConnectionString())
-
-	smokeTest := NewSmokeTest(*baseURL, *parallel)
+	smokeTest := NewSmokeTest(*baseURL, *parallel, *resultsFile)
 	smokeTest.Run(*iterations)
 }

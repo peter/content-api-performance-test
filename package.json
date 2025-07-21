@@ -1,0 +1,32 @@
+{
+  "name": "content-api",
+  "version": "1.0.0",
+  "description": "```sh # Check go installation go version # go version go1.24.4 darwin/arm64",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seenthis-ab/content-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/seenthis-ab/content-api/issues"
+  },
+  "homepage": "https://github.com/seenthis-ab/content-api#readme",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "fastify": "^5.4.0",
+    "lodash": "^4.17.21",
+    "pg": "^8.16.3",
+    "ulid": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13"
+  }
+}
