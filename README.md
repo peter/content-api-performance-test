@@ -2,8 +2,6 @@
 
 ## Performance Test Results: Node.js REST API with SQLite
 
-JavaScript performance test:
-
 ```sh
 TEST_PARALLEL=1 TEST_LIMIT=500 ./scripts/performance-test/run.js
 # {"timestamp":"2025-07-21T05:45:42.119Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":500,"TEST_PARALLEL":1,"N_BATCHES":500,"testCount":{"error":0,"success":500,"total":500},"testElapsed":{"count":500,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":500,"min":0,"max":13,"avg":0.734,"p90":1,"p95":1,"p99":2},"readElapsed":{"count":1500,"min":0,"max":14,"avg":0.488,"p90":1,"p95":1,"p99":1},"updateElapsed":{"count":500,"min":0,"max":6,"avg":0.94,"p90":1,"p95":2,"p99":2},"deleteElapsed":{"count":500,"min":0,"max":4,"avg":0.572,"p90":1,"p95":1,"p99":1},"requestElapsed":{"count":3000,"min":0,"max":14,"avg":0.6183333333333333,"p90":1,"p95":1,"p99":2},"requests":{"totalCount":3000,"countPerSecond":1594.896331738437},"elapsedTotal":1881}
@@ -86,7 +84,7 @@ scripts/run
 scripts/smoke-test.sh
 
 # Load SQLite test data
-go run scripts/sqlite/generate_test_data/main.go 
+go run scripts/sqlite/generate_test_data/main.go
 ```
 
 Pretty printing JSON logs:
@@ -127,14 +125,14 @@ rm -f db/sqlite/content-api.db
 ./scripts/migrate
 
 # Without WAL mode:
-go run scripts/sqlite/generate_test_data/main.go 
+go run scripts/sqlite/generate_test_data/main.go
 # Successfully created 100000 test records in 46.16 seconds
 # Average rate: 2166.5 records/second
-du -sh db/sqlite/content-api.db 
+du -sh db/sqlite/content-api.db
 # 61M	db/sqlite/content-api.db
 
 # Without WAL mode:
-go run scripts/sqlite/generate_test_data/main.go 
+go run scripts/sqlite/generate_test_data/main.go
 # Successfully created 100000 test records in 8.57 seconds
 # Average rate: 11664.8 records/second
 ```
@@ -202,7 +200,7 @@ migrate -database "postgres://postgres:postgres@localhost:5432/content_api?sslmo
 # SQLite Console
 
 ```sh
-sqlite3 db/sqlite/content-api.db 
+sqlite3 db/sqlite/content-api.db
 .schema
 select count(*) from content;
 select * from content order by created_at desc limit 100;
@@ -261,10 +259,9 @@ bin/rails server -p 8888
 
 ## Resources
 
-* [go-sqlite3 - SQLite Library](https://github.com/mattn/go-sqlite3)
-* [pgx - Postgres Library](https://github.com/jackc/pgx)
-* [WAL File Size Issue with SQLite](https://news.ycombinator.com/item?id=40688987)
+- [go-sqlite3 - SQLite Library](https://github.com/mattn/go-sqlite3)
+- [pgx - Postgres Library](https://github.com/jackc/pgx)
+- [WAL File Size Issue with SQLite](https://news.ycombinator.com/item?id=40688987)
 
-* [Huma Web Framework with OpenAPI Support](https://github.com/danielgtaylor/huma)
-* [Huma Logging Middleware with Request Context](https://github.com/danielgtaylor/huma/blob/v1.14.3/middleware/logger.go)
-
+- [Huma Web Framework with OpenAPI Support](https://github.com/danielgtaylor/huma)
+- [Huma Logging Middleware with Request Context](https://github.com/danielgtaylor/huma/blob/v1.14.3/middleware/logger.go)
