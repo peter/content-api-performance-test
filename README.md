@@ -2,7 +2,31 @@
 
 ## Performance Test Results Summary
 
-The numbers below should be considered rough estimations (ballpark figures) and basically no optimization has been made in each runtime to improve performance or scalability. The code between teach platform can also differ slightly
+The [test runner](scripts/performance-test/run.js) is written in JavaScript and issues HTTP requests against a web server running on localhost on port 8888. The script will execute a certain number of tests in parallel (i.e. 100) and each test executes the following sequence of HTTP requests:
+
+1. POST /content
+2. GET /content/:id
+3. PUT /content/:id
+4. GET /content/:id
+5. DELETE /content/:id
+6. GET /content/:id
+
+The content being created is stored in a `content` database table and looks roughly like this:
+
+```javascript
+{
+    title:  `Smoke Test Content ${runId}`,
+    body:   `This is smoke test content number ${runId}`,
+    author: "Smoke Tester",
+    status: "draft",
+    data: {
+        "run_id": runId,
+        "created_at": createdAt,
+    },
+}
+```
+
+The numbers below should be considered rough estimations (ballpark figures) and no particular optimization has been made in each runtime to improve performance or scalability. The code between teach platform can differ slightly (in how it validates payloads etc.):
 
 |Runtime|Database|Number of Tests|Test Concurrency|Number of Requests|Total Time (ms)|Requests Per Second|Response Time Avg (ms)|Response Time P99 (ms)|Read Response Time Avg (ms)|Read Response Time P99 (ms)|
 |-|-|-|-|-|-|-|-|-|-|-|
