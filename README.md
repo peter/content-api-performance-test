@@ -1,5 +1,19 @@
 # Performance Test of Example Go / Node.js CRUD API with SQLite or Postgres
 
+## Performance Test Results Summary
+
+The numbers below should be considered rough estimations (ballpark figures) and basically no optimization has been made in each runtime to improve performance or scalability. The code between teach platform can also differ slightly
+
+|Runtime|Database|Number of Tests|Test Concurrency|Number of Requests|Total Time (ms)|Requests Per Second|Response Time Avg (ms)|Response Time P99 (ms)|Read Response Time Avg (ms)|Read Response Time P99 (ms)|
+|-|-|-|-|-|-|-|-|-|-|-|
+|Node.js|SQLite|500|1|3000|1900|1600|0.6|2|0.5|1|
+|Node.js|SQLite|10000|100|60000|5100|12000|7|17|7|16|
+|Node.js|SQLite|10000|500|60000|5400|11000|33|186|21|60|
+|Node.js|SQLite|10000|1000|60000|5500|11000|67|431|36|117|
+|Go|SQLite|10000|100|60000|36000|1700|12|158|1|10|
+|Go|Postgres|10000|100|60000|5100|11800|7|18|6|15|
+|Ruby on Rails|SQLite|400|80|2400|53000|45|926|10000|43|300|
+
 ## Performance Test Results: Node.js REST API with SQLite
 
 ```sh
@@ -84,7 +98,7 @@ scripts/run
 scripts/smoke-test.sh
 
 # Load SQLite test data
-go run scripts/sqlite/generate_test_data/main.go
+go run scripts/sqlite/generate_test_data/main.go 
 ```
 
 Pretty printing JSON logs:
@@ -125,14 +139,14 @@ rm -f db/sqlite/content-api.db
 ./scripts/migrate
 
 # Without WAL mode:
-go run scripts/sqlite/generate_test_data/main.go
+go run scripts/sqlite/generate_test_data/main.go 
 # Successfully created 100000 test records in 46.16 seconds
 # Average rate: 2166.5 records/second
-du -sh db/sqlite/content-api.db
+du -sh db/sqlite/content-api.db 
 # 61M	db/sqlite/content-api.db
 
 # Without WAL mode:
-go run scripts/sqlite/generate_test_data/main.go
+go run scripts/sqlite/generate_test_data/main.go 
 # Successfully created 100000 test records in 8.57 seconds
 # Average rate: 11664.8 records/second
 ```
@@ -200,7 +214,7 @@ migrate -database "postgres://postgres:postgres@localhost:5432/content_api?sslmo
 # SQLite Console
 
 ```sh
-sqlite3 db/sqlite/content-api.db
+sqlite3 db/sqlite/content-api.db 
 .schema
 select count(*) from content;
 select * from content order by created_at desc limit 100;
@@ -259,9 +273,10 @@ bin/rails server -p 8888
 
 ## Resources
 
-- [go-sqlite3 - SQLite Library](https://github.com/mattn/go-sqlite3)
-- [pgx - Postgres Library](https://github.com/jackc/pgx)
-- [WAL File Size Issue with SQLite](https://news.ycombinator.com/item?id=40688987)
+* [go-sqlite3 - SQLite Library](https://github.com/mattn/go-sqlite3)
+* [pgx - Postgres Library](https://github.com/jackc/pgx)
+* [WAL File Size Issue with SQLite](https://news.ycombinator.com/item?id=40688987)
 
-- [Huma Web Framework with OpenAPI Support](https://github.com/danielgtaylor/huma)
-- [Huma Logging Middleware with Request Context](https://github.com/danielgtaylor/huma/blob/v1.14.3/middleware/logger.go)
+* [Huma Web Framework with OpenAPI Support](https://github.com/danielgtaylor/huma)
+* [Huma Logging Middleware with Request Context](https://github.com/danielgtaylor/huma/blob/v1.14.3/middleware/logger.go)
+
