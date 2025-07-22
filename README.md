@@ -36,6 +36,7 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 |Node.js|SQLite|10000|1000|60000|5500|11000|67|431|36|117|
 |Go|SQLite|10000|100|60000|36000|1700|12|158|1|10|
 |Go|Postgres|10000|100|60000|5100|11800|7|18|6|15|
+|Elixir/Phoenix|SQLite|500|50|3000|2300|1308|34|117|44|128|
 |Ruby on Rails|SQLite|400|80|2400|53000|45|926|10000|43|300|
 
 ## Performance Test Results: Node.js REST API with SQLite
@@ -98,6 +99,16 @@ TEST_PARALLEL=50 TEST_LIMIT=150 ./scripts/performance-test/run.js
 
 TEST_PARALLEL=80 TEST_LIMIT=400 ./scripts/performance-test/run.js
 # {"timestamp":"2025-07-21T05:34:07.439Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":400,"TEST_PARALLEL":80,"N_BATCHES":5,"testCount":{"error":0,"success":400,"total":400},"testElapsed":{"count":400,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":400,"min":26,"max":11802,"avg":5288.0325,"p90":9346,"p95":10149,"p99":11428},"readElapsed":{"count":1200,"min":3,"max":360,"avg":43.87833333333333,"p90":110,"p95":120,"p99":306},"updateElapsed":{"count":400,"min":4,"max":119,"avg":8.6625,"p90":16,"p95":23,"p99":108},"deleteElapsed":{"count":400,"min":4,"max":10430,"avg":130.26,"p90":13,"p95":22,"p99":9423},"requestElapsed":{"count":2400,"min":3,"max":11802,"avg":926.4316666666666,"p90":4429,"p95":7446,"p99":10027},"requests":{"totalCount":2400,"countPerSecond":45.314653626116346},"elapsedTotal":52963}
+```
+
+## Performance Test Result: Elixir/Phoenix with SQLite
+
+```sh
+TEST_PARALLEL=100 ./scripts/performance-test/run.js 
+# {"timestamp":"2025-07-22T07:50:20.813Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":71,"success":9929,"total":10000},"testElapsed":{"count":9929,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":9929,"min":14,"max":95,"avg":42.12468526538423,"p90":57,"p95":63,"p99":73},"readElapsed":{"count":29787,"min":11,"max":288,"avg":73.10957800382717,"p90":173,"p95":182,"p99":219},"updateElapsed":{"count":9929,"min":15,"max":80,"avg":37.39278880048343,"p90":48,"p95":51,"p99":60},"deleteElapsed":{"count":9929,"min":12,"max":188,"avg":37.178668546681436,"p90":47,"p95":53,"p99":75},"requestElapsed":{"count":59574,"min":11,"max":288,"avg":56.0041461040051,"p90":144,"p95":173,"p99":199},"requests":{"totalCount":59574,"countPerSecond":1513.1826263652529},"elapsedTotal":39370}
+
+TEST_PARALLEL=50 TEST_LIMIT=500 ./scripts/performance-test/run.js
+# {"timestamp":"2025-07-22T07:44:06.506Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":500,"TEST_PARALLEL":50,"N_BATCHES":10,"testCount":{"error":0,"success":500,"total":500},"testElapsed":{"count":500,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":500,"min":13,"max":51,"avg":28.408,"p90":37,"p95":41,"p99":48},"readElapsed":{"count":1500,"min":11,"max":134,"avg":44.04866666666667,"p90":98,"p95":102,"p99":128},"updateElapsed":{"count":500,"min":13,"max":44,"avg":23.26,"p90":29,"p95":31,"p99":36},"deleteElapsed":{"count":500,"min":12,"max":35,"avg":21.736,"p90":26,"p95":28,"p99":32},"requestElapsed":{"count":3000,"min":11,"max":134,"avg":34.25833333333333,"p90":90,"p95":98,"p99":117},"requests":{"totalCount":3000,"countPerSecond":1308.9005235602094},"elapsedTotal":2292}
 ```
 
 ## Developer Setup - Go Server
@@ -293,6 +304,44 @@ bin/rails server -p 8888
 #     status: params[:status],
 #     data: params[:data]
 #   }
+```
+
+## How the Elixir App Was Created
+
+```sh
+mix phx.new content-api-elixir --app content_api --database sqlite3 --no-html --no-assets
+cd content-api-elixir
+mix ecto.create
+# EDIT: Change port in config/dev.exs to 8888
+mix phx.server
+
+mix phx.gen.context Api Content content id:text title:text body:text author:text status:text data:text
+# * creating lib/content_api/api/content.ex
+# * creating priv/repo/migrations/20250722061051_create_content.exs
+# * creating lib/content_api/api.ex
+# * injecting lib/content_api/api.ex
+# * creating test/content_api/api_test.exs
+# * injecting test/content_api/api_test.exs
+# * creating test/support/fixtures/api_fixtures.ex
+# * injecting test/support/fixtures/api_fixtures.ex
+# EDIT: add custom SQL to migration file
+# EDIT: add @primary_key {:id, :string, []} to model
+mix ecto.migrate
+mix phx.gen.json Api Content content title:text body:text author:text status:text data:text --no-context --no-schema
+# * creating lib/content_api_web/controllers/content_controller.ex
+# * creating lib/content_api_web/controllers/content_json.ex
+# * creating lib/content_api_web/controllers/changeset_json.ex
+# * creating test/content_api_web/controllers/content_controller_test.exs
+# * creating lib/content_api_web/controllers/fallback_controller.ex
+# EDIT: Add the resource to the "/api" scope in lib/content_api_web/router.ex:
+# resources "/content", ContentController, except: [:new, :edit]
+# EDIT: removed content nested JSON property in responses
+# EDIT: added ULID id generation
+
+iex -S mix 
+ContentApi.Repo.all(ContentApi.Api.Content)
+
+mix ecto.reset
 ```
 
 ## Resources

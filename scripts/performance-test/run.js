@@ -124,7 +124,7 @@ async function runBatch(batchIndex, batch) {
             return result;
         } catch (error) {
             logError(`Error thrown running test`, { batchIndex, index, error })
-            return error;
+            throw error;
         }
     }))
     logDebug(`Finished batch`, { batchIndex, batchSize: batch.length, elapsed: Date.now() - startTime })
