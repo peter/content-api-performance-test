@@ -36,7 +36,7 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 |Node.js|SQLite|10000|1000|60000|5500|11000|67|431|36|117|
 |Go|SQLite|10000|100|60000|36000|1700|12|158|1|10|
 |Go|Postgres|10000|100|60000|5100|11800|7|18|6|15|
-|Elixir/Phoenix|SQLite|500|50|3000|2300|1308|34|117|44|128|
+|Elixir/Phoenix|SQLite|10000|100|60000|29000|2100|42|104|48|112|
 |Ruby on Rails|SQLite|400|80|2400|53000|45|926|10000|43|300|
 
 ## Performance Test Results: Node.js REST API with SQLite
@@ -105,10 +105,8 @@ TEST_PARALLEL=80 TEST_LIMIT=400 ./scripts/performance-test/run.js
 
 ```sh
 TEST_PARALLEL=100 ./scripts/performance-test/run.js 
-# {"timestamp":"2025-07-22T07:50:20.813Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":71,"success":9929,"total":10000},"testElapsed":{"count":9929,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":9929,"min":14,"max":95,"avg":42.12468526538423,"p90":57,"p95":63,"p99":73},"readElapsed":{"count":29787,"min":11,"max":288,"avg":73.10957800382717,"p90":173,"p95":182,"p99":219},"updateElapsed":{"count":9929,"min":15,"max":80,"avg":37.39278880048343,"p90":48,"p95":51,"p99":60},"deleteElapsed":{"count":9929,"min":12,"max":188,"avg":37.178668546681436,"p90":47,"p95":53,"p99":75},"requestElapsed":{"count":59574,"min":11,"max":288,"avg":56.0041461040051,"p90":144,"p95":173,"p99":199},"requests":{"totalCount":59574,"countPerSecond":1513.1826263652529},"elapsedTotal":39370}
-
-TEST_PARALLEL=50 TEST_LIMIT=500 ./scripts/performance-test/run.js
-# {"timestamp":"2025-07-22T07:44:06.506Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":500,"TEST_PARALLEL":50,"N_BATCHES":10,"testCount":{"error":0,"success":500,"total":500},"testElapsed":{"count":500,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":500,"min":13,"max":51,"avg":28.408,"p90":37,"p95":41,"p99":48},"readElapsed":{"count":1500,"min":11,"max":134,"avg":44.04866666666667,"p90":98,"p95":102,"p99":128},"updateElapsed":{"count":500,"min":13,"max":44,"avg":23.26,"p90":29,"p95":31,"p99":36},"deleteElapsed":{"count":500,"min":12,"max":35,"avg":21.736,"p90":26,"p95":28,"p99":32},"requestElapsed":{"count":3000,"min":11,"max":134,"avg":34.25833333333333,"p90":90,"p95":98,"p99":117},"requests":{"totalCount":3000,"countPerSecond":1308.9005235602094},"elapsedTotal":2292}
+# {"timestamp":"2025-07-22T14:27:34.137Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":13,"max":131,"avg":39.697,"p90":57,"p95":66,"p99":103},"readElapsed":{"count":30000,"min":9,"max":138,"avg":48.007533333333335,"p90":87,"p95":94,"p99":112},"updateElapsed":{"count":10000,"min":12,"max":88,"avg":33.6144,"p90":43,"p95":48,"p99":60},"deleteElapsed":{"count":10000,"min":12,"max":82,"avg":34.3503,"p90":44,"p95":50,"p99":63},"requestElapsed":{"count":60000,"min":9,"max":138,"avg":41.947383333333335,"p90":77,"p95":88,"p99":104},"requests":{"totalCount":60000,"countPerSecond":2070.8935905843373},"elapsedTotal":28973}
+# {"timestamp":"2025-07-22T14:28:17.237Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":14,"max":88,"avg":38.7593,"p90":55,"p95":61,"p99":71},"readElapsed":{"count":30000,"min":13,"max":131,"avg":48.6483,"p90":90,"p95":96,"p99":109},"updateElapsed":{"count":10000,"min":15,"max":77,"avg":33.6887,"p90":43,"p95":48,"p99":57},"deleteElapsed":{"count":10000,"min":13,"max":80,"avg":33.3294,"p90":42,"p95":46,"p99":56},"requestElapsed":{"count":60000,"min":13,"max":131,"avg":41.953716666666665,"p90":77,"p95":90,"p99":103},"requests":{"totalCount":60000,"countPerSecond":2081.6708878326335},"elapsedTotal":28823}
 ```
 
 ## Developer Setup - Go Server
