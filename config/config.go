@@ -80,7 +80,7 @@ func LoadDatabaseConfig() *DatabaseConfig {
 		fallthrough
 	default:
 		// Default SQLite path
-		defaultDBPath := "db/sqlite/content-api.db?_journal=WAL"
+		defaultDBPath := "db/sqlite/content-api.db?_journal=WAL&_journal_mode=WAL"
 
 		// Use default path and ensure directory exists
 		if err := os.MkdirAll(filepath.Dir(defaultDBPath), 0755); err != nil {

@@ -7,6 +7,7 @@ import assert from 'node:assert';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8888';
 const TEST_LIMIT = parseInt(process.env.TEST_LIMIT || 10_000)
 const TEST_PARALLEL = parseInt(process.env.TEST_PARALLEL || 100)
+const TEST_DATA_FIELD = process.env.TEST_DATA_FIELD !== 'false'
 
 const LOG_LEVELS = ['DEBUG', 'INFO', 'ERROR']
 const LOG_LEVEL = (process.env.LOG_LEVEL || 'DEBUG').toUpperCase()
@@ -58,10 +59,12 @@ async function runTest(batchIndex, index) {
 		body:   `This is smoke test content number ${runId}`,
 		author: "Smoke Tester",
 		status: "draft",
-		data: {
+    }
+    if (TEST_DATA_FIELD) {
+        content.data = {
 			"run_id": runId,
 			"created_at": createdAt,
-		},
+		}
     }
 
     // CREATE
@@ -79,8 +82,10 @@ async function runTest(batchIndex, index) {
     assert.strictEqual(response.data.body, content.body)
     assert.strictEqual(response.data.author, content.author)
     assert.strictEqual(response.data.status, content.status)
-    assert.strictEqual(response.data.data.run_id, runId)
-    assert.strictEqual(response.data.data.created_at, createdAt)
+    if (TEST_DATA_FIELD) {
+        assert.strictEqual(response.data.data.run_id, runId)
+        assert.strictEqual(response.data.data.created_at, createdAt)
+    }
 
     // UPDATE
     startTime = Date.now()
@@ -123,7 +128,7 @@ async function runBatch(batchIndex, batch) {
             const result = await runTest(batchIndex, index);
             return result;
         } catch (error) {
-            logError(`Error thrown running test`, { batchIndex, index, error })
+            logError(`Error thrown running test`, { batchIndex, index, error: error.stack || error })
             throw error;
         }
     }))
