@@ -1,4 +1,6 @@
-# Performance Test of Example Go / Node.js CRUD API with SQLite or Postgres
+# Performance Test of Example Node.js / Go / Elixir / Ruby CRUD API with SQLite or Postgres
+
+The motivation for these performance tests was to figure out if you can get sufficient performance with SQLite running in a single process on a single server. The use case I had in mind was a CMS backend (or similar type of app) exposing a classic CRUD/REST API.
 
 ## Performance Test Results Summary
 
@@ -37,6 +39,7 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 |Go|SQLite|10000|100|60000|36000|1700|12|158|1|10|
 |Go|Postgres|10000|100|60000|5100|11800|7|18|6|15|
 |Elixir/Phoenix|SQLite|10000|100|60000|29000|2100|42|104|48|112|
+|Elixir/Phoenix|Postgres|10000|100|60000|29900|2004|43|107|51|118|
 |Ruby on Rails|SQLite|400|80|2400|30000|79|500|5700|4|13|
 
 ## Performance Test Results: Node.js REST API with SQLite
@@ -108,6 +111,17 @@ TEST_PARALLEL=80 TEST_LIMIT=400 TEST_DATA_FIELD=false ./scripts/performance-test
 TEST_PARALLEL=100 TEST_DATA_FIELD=false ./scripts/performance-test/run.js 
 # {"timestamp":"2025-07-22T14:27:34.137Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":13,"max":131,"avg":39.697,"p90":57,"p95":66,"p99":103},"readElapsed":{"count":30000,"min":9,"max":138,"avg":48.007533333333335,"p90":87,"p95":94,"p99":112},"updateElapsed":{"count":10000,"min":12,"max":88,"avg":33.6144,"p90":43,"p95":48,"p99":60},"deleteElapsed":{"count":10000,"min":12,"max":82,"avg":34.3503,"p90":44,"p95":50,"p99":63},"requestElapsed":{"count":60000,"min":9,"max":138,"avg":41.947383333333335,"p90":77,"p95":88,"p99":104},"requests":{"totalCount":60000,"countPerSecond":2070.8935905843373},"elapsedTotal":28973}
 # {"timestamp":"2025-07-22T14:28:17.237Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":14,"max":88,"avg":38.7593,"p90":55,"p95":61,"p99":71},"readElapsed":{"count":30000,"min":13,"max":131,"avg":48.6483,"p90":90,"p95":96,"p99":109},"updateElapsed":{"count":10000,"min":15,"max":77,"avg":33.6887,"p90":43,"p95":48,"p99":57},"deleteElapsed":{"count":10000,"min":13,"max":80,"avg":33.3294,"p90":42,"p95":46,"p99":56},"requestElapsed":{"count":60000,"min":13,"max":131,"avg":41.953716666666665,"p90":77,"p95":90,"p99":103},"requests":{"totalCount":60000,"countPerSecond":2081.6708878326335},"elapsedTotal":28823}
+```
+
+## Performance Test Result: Elixir/Phoenix with Postgres
+
+* Repo: https://github.com/peter/content-api-elixir
+* Start server command: `DATABASE_ENGINE=postgres mix phx.server`
+
+```sh
+TEST_PARALLEL=100 TEST_DATA_FIELD=false ./scripts/performance-test/run.js 
+# {"timestamp":"2025-07-22T17:11:09.893Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":13,"max":112,"avg":39.0961,"p90":54,"p95":62,"p99":78},"readElapsed":{"count":30000,"min":7,"max":182,"avg":51.065,"p90":92,"p95":98,"p99":118},"updateElapsed":{"count":10000,"min":14,"max":96,"avg":34.2748,"p90":43,"p95":49,"p99":68},"deleteElapsed":{"count":10000,"min":13,"max":117,"avg":34.4257,"p90":44,"p95":49,"p99":66},"requestElapsed":{"count":60000,"min":7,"max":182,"avg":43.4986,"p90":82,"p95":92,"p99":107},"requests":{"totalCount":60000,"countPerSecond":2004.4097013429543},"elapsedTotal":29934}
+# {"timestamp":"2025-07-22T17:20:28.985Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":14,"max":102,"avg":44.2636,"p90":56,"p95":62,"p99":86},"readElapsed":{"count":30000,"min":14,"max":180,"avg":56.072433333333336,"p90":100,"p95":109,"p99":142},"updateElapsed":{"count":10000,"min":15,"max":87,"avg":38.2731,"p90":48,"p95":54,"p99":68},"deleteElapsed":{"count":10000,"min":23,"max":118,"avg":38.3921,"p90":47,"p95":56,"p99":85},"requestElapsed":{"count":60000,"min":14,"max":180,"avg":48.19101666666667,"p90":89,"p95":101,"p99":126},"requests":{"totalCount":60000,"countPerSecond":1858.620903289759},"elapsedTotal":32282}
 ```
 
 ## Developer Setup - Go Server
@@ -310,6 +324,7 @@ bin/rails server -p 8888
 ```sh
 mix phx.new content-api-elixir --app content_api --database sqlite3 --no-html --no-assets
 cd content-api-elixir
+# mix deps.get
 mix ecto.create
 # EDIT: Change port in config/dev.exs to 8888
 mix phx.server
