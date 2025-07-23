@@ -2,6 +2,8 @@
 
 The motivation for these performance tests was to figure out if you can get sufficient performance with SQLite running in a single process on a single server. The use case I had in mind was a CMS backend (or similar type of app) exposing a classic CRUD/REST API.
 
+**Preliminary finding: on my M1 Macbook laptop both SQLite and Postgres can do around 10k read and write queries per second with a p99 response time of around 20 ms and request concurrency level of 100. This should be more than sufficient for most applications.**
+
 ## Performance Test Results Summary
 
 The [test runner](scripts/performance-test/run.js) is written in JavaScript and issues HTTP requests against a web server running on localhost on port 8888. The script will execute a certain number of tests in parallel (i.e. 100) and each test executes the following sequence of HTTP requests:
@@ -28,7 +30,7 @@ The content being created is stored in a `content` database table and looks roug
 }
 ```
 
-The numbers below should be considered rough estimations (ballpark figures) and no particular optimization has been made in each runtime to improve performance or scalability. The code between teach platform can differ slightly (in how it validates payloads etc.):
+The numbers below should be considered rough estimations (ballpark figures) and no particular optimization has been made in each runtime to improve performance or scalability. The code between each platform can differ slightly (in how it validates payloads etc.):
 
 |Runtime|Database|Number of Tests|Test Concurrency|Number of Requests|Total Time (ms)|Requests Per Second|Response Time Avg (ms)|Response Time P99 (ms)|Read Response Time Avg (ms)|Read Response Time P99 (ms)|
 |-|-|-|-|-|-|-|-|-|-|-|
