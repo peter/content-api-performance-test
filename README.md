@@ -285,7 +285,7 @@ createdb content_api
 migrate -database "postgres://postgres:postgres@localhost:5432/content_api?sslmode=disable" -path db/postgres/migrations up
 ```
 
-# SQLite Console
+## SQLite Console
 
 ```sh
 sqlite3 db/sqlite/content-api.db 
