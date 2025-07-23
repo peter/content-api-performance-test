@@ -143,26 +143,25 @@ export class PostgresContentStore {
     }
 }
 
+// Database configuration - you can move this to environment variables
+// postgres://postgres:postgres@localhost:5432/content_api?sslmode=disable
+const dbConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT) || 5432,
+    database: process.env.DB_NAME || 'content_api',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    maxConns: parseInt(process.env.DB_MAX_CONNS) || 50,
+    minConns: parseInt(process.env.DB_MIN_CONNS) || 5
+  };
+  
 // Factory function to create ContentStore instances
-export function createContentStore(dbConfig) {
+export function createContentStore() {
+    console.log('Creating PostgresContentStore')
     const connString = `postgresql://${dbConfig.user}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
     return new PostgresContentStore(
         connString,
         dbConfig.maxConns || 50,
         dbConfig.minConns || 5
     );
-}
-
-// Helper function to create a new Content instance
-export function createContent(data = {}) {
-    return {
-        id: data.id || '',
-        title: data.title || '',
-        body: data.body || '',
-        author: data.author || '',
-        status: data.status || 'draft',
-        data: data.data || {},
-        created_at: data.created_at || new Date(),
-        updated_at: data.updated_at || new Date(),
-    };
 }

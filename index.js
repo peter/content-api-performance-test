@@ -1,25 +1,29 @@
 import Fastify from 'fastify';
 import { ulid } from 'ulid';
-import { createContentStore, createContent } from './models/content.js';
+import * as pgContent from './models/content-postgres.js';
+import * as sqliteContent from './models/content-sqlite.js';
 
 const fastify = Fastify({
   logger: { level: 'info' }
 });
 
-// Database configuration - you can move this to environment variables
-// postgres://postgres:postgres@localhost:5432/content_api?sslmode=disable
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME || 'content_api',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  maxConns: parseInt(process.env.DB_MAX_CONNS) || 50,
-  minConns: parseInt(process.env.DB_MIN_CONNS) || 5
-};
+
+// Helper function to create a new Content instance
+export function createContent(data = {}) {
+  return {
+      id: data.id || '',
+      title: data.title || '',
+      body: data.body || '',
+      author: data.author || '',
+      status: data.status || 'draft',
+      data: data.data || {},
+      created_at: data.created_at || new Date(),
+      updated_at: data.updated_at || new Date(),
+  };
+}
 
 // Create content store instance
-const contentStore = createContentStore(dbConfig);
+const contentStore = process.env.DATABASE_ENGINE === 'postgres' ? pgContent.createContentStore() : sqliteContent.createContentStore()
 
 // Request/Response schemas for validation
 const createContentSchema = {

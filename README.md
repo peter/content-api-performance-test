@@ -32,10 +32,12 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 
 |Runtime|Database|Number of Tests|Test Concurrency|Number of Requests|Total Time (ms)|Requests Per Second|Response Time Avg (ms)|Response Time P99 (ms)|Read Response Time Avg (ms)|Read Response Time P99 (ms)|
 |-|-|-|-|-|-|-|-|-|-|-|
-|Node.js|SQLite|500|1|3000|1900|1600|0.6|2|0.5|1|
-|Node.js|SQLite|10000|100|60000|5100|12000|7|17|7|16|
-|Node.js|SQLite|10000|500|60000|5400|11000|33|186|21|60|
-|Node.js|SQLite|10000|1000|60000|5500|11000|67|431|36|117|
+|Node.js|SQLite|500|1|3000|950|3200|0.3|1|0.3|1|
+|Node.js|SQLite|10000|100|60000|5000|12000|7|17|6|16|
+|Node.js|SQLite|10000|1000|60000|6100|9900|57|464|20|152|
+|Node.js|Postgres|500|1|3000|1900|1600|0.6|2|0.5|1|
+|Node.js|Postgres|10000|100|60000|5100|12000|7|17|7|16|
+|Node.js|Postgres|10000|1000|60000|5500|11000|67|431|36|117|
 |Go|SQLite|10000|100|60000|36000|1700|12|158|1|10|
 |Go|Postgres|10000|100|60000|5100|11800|7|18|6|15|
 |Elixir/Phoenix|SQLite|10000|100|60000|29000|2100|42|104|48|112|
@@ -43,6 +45,28 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 |Ruby on Rails|SQLite|400|80|2400|30000|79|500|5700|4|13|
 
 ## Performance Test Results: Node.js REST API with SQLite
+
+* Repo: https://github.com/peter/content-api-performance-test
+* Start server command: `npm run dev`
+
+```sh
+TEST_PARALLEL=1 TEST_LIMIT=500 ./scripts/performance-test/run.js
+# {"timestamp":"2025-07-23T06:23:29.885Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":500,"TEST_PARALLEL":1,"N_BATCHES":500,"testCount":{"error":0,"success":500,"total":500},"testElapsed":{"count":500,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":500,"min":0,"max":12,"avg":0.4,"p90":1,"p95":1,"p99":1},"readElapsed":{"count":1500,"min":0,"max":2,"avg":0.25266666666666665,"p90":1,"p95":1,"p99":1},"updateElapsed":{"count":500,"min":0,"max":3,"avg":0.394,"p90":1,"p95":1,"p99":1},"deleteElapsed":{"count":500,"min":0,"max":2,"avg":0.31,"p90":1,"p95":1,"p99":1},"requestElapsed":{"count":3000,"min":0,"max":12,"avg":0.31033333333333335,"p90":1,"p95":1,"p99":1},"requests":{"totalCount":3000,"countPerSecond":3151.2605042016808},"elapsedTotal":952}
+
+TEST_PARALLEL=100 ./scripts/performance-test/run.js
+# {"timestamp":"2025-07-23T06:21:42.687Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":3,"max":102,"avg":9.3115,"p90":14,"p95":15,"p99":29},"readElapsed":{"count":30000,"min":0,"max":31,"avg":6.399533333333333,"p90":11,"p95":12,"p99":16},"updateElapsed":{"count":10000,"min":1,"max":26,"avg":9.0198,"p90":12,"p95":14,"p99":18},"deleteElapsed":{"count":10000,"min":0,"max":18,"avg":5.1821,"p90":8,"p95":9,"p99":11},"requestElapsed":{"count":60000,"min":0,"max":102,"avg":7.118666666666667,"p90":12,"p95":13,"p99":17},"requests":{"totalCount":60000,"countPerSecond":11961.722488038278},"elapsedTotal":5016}
+
+TEST_PARALLEL=500 ./scripts/performance-test/run.js
+# {"timestamp":"2025-07-23T06:21:57.712Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":500,"N_BATCHES":20,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":24,"max":259,"avg":106.043,"p90":207,"p95":221,"p99":236},"readElapsed":{"count":30000,"min":0,"max":121,"avg":13.410566666666666,"p90":30,"p95":41,"p99":77},"updateElapsed":{"count":10000,"min":0,"max":116,"avg":15.2661,"p90":30,"p95":38,"p99":60},"deleteElapsed":{"count":10000,"min":0,"max":59,"avg":10.3394,"p90":20,"p95":33,"p99":49},"requestElapsed":{"count":60000,"min":0,"max":259,"avg":28.6467,"p90":56,"p95":155,"p99":218},"requests":{"totalCount":60000,"countPerSecond":11398.176291793312},"elapsedTotal":5264}
+
+TEST_PARALLEL=1000 ./scripts/performance-test/run.js
+# {"timestamp":"2025-07-23T06:22:10.599Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":1000,"N_BATCHES":10,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":58,"max":740,"avg":241.3515,"p90":446,"p95":470,"p99":502},"readElapsed":{"count":30000,"min":0,"max":193,"avg":20.398033333333334,"p90":55,"p95":71,"p99":152},"updateElapsed":{"count":10000,"min":0,"max":162,"avg":25.3618,"p90":58,"p95":113,"p99":158},"deleteElapsed":{"count":10000,"min":0,"max":81,"avg":16.5591,"p90":40,"p95":67,"p99":77},"requestElapsed":{"count":60000,"min":0,"max":740,"avg":57.41108333333333,"p90":167,"p95":326,"p99":464},"requests":{"totalCount":60000,"countPerSecond":9894.459102902374},"elapsedTotal":6064}
+```
+
+## Performance Test Results: Node.js REST API with Postgres
+
+* Repo: https://github.com/peter/content-api-performance-test
+* Start server command: `DATABASE_ENGINE=postgres npm run dev`
 
 ```sh
 TEST_PARALLEL=1 TEST_LIMIT=500 ./scripts/performance-test/run.js
