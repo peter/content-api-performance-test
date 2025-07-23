@@ -2,7 +2,7 @@
 
 The motivation for these performance tests was to figure out if you can get sufficient performance with SQLite running in a single process on a single server. The use case I had in mind was a CMS backend (or similar type of app) exposing a classic CRUD/REST API.
 
-**Preliminary finding: on my M1 Macbook laptop both SQLite and Postgres can do around 10k read and write queries per second with a p99 response time of around 20 ms and request concurrency level of 100. This should be more than sufficient for most applications.**
+**Preliminary finding: on my M1 Macbook laptop Node.js with either SQLite or Postgres can do around 10k read and write queries per second with a p99 response time of around 20 ms and request concurrency level of 100. This should be more than sufficient for most applications.**
 
 ## Performance Test Results Summary
 
