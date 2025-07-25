@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { ulid } from 'ulid';
 import * as pgContent from './models/content-postgres.js';
 import * as sqliteContent from './models/content-sqlite.js';
+import * as memoryContent from './models/content-memory.js';
 
 const fastify = Fastify({
   logger: { level: 'info' }
@@ -22,8 +23,19 @@ export function createContent(data = {}) {
   };
 }
 
-// Create content store instance
-const contentStore = process.env.DATABASE_ENGINE === 'postgres' ? pgContent.createContentStore() : sqliteContent.createContentStore()
+function getContentStore() {
+  if (process.env.DATABASE_ENGINE === 'postgres') {
+    return pgContent.createContentStore();
+  } else if (process.env.DATABASE_ENGINE === 'memory') {
+    return memoryContent.createContentStore();
+  } else if (process.env.DATABASE_ENGINE === 'sqlite' || process.env.DATABASE_ENGINE === undefined) {
+    return sqliteContent.createContentStore();
+  } else {
+    throw new Error(`Unsupported DATABASE_ENGINE: ${process.env.DATABASE_ENGINE}`);
+  }
+}
+
+const contentStore = getContentStore()
 
 // Request/Response schemas for validation
 const createContentSchema = {
