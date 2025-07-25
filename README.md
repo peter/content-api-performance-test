@@ -35,6 +35,7 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 |Runtime|Database|Number of Tests|Test Concurrency|Number of Requests|Total Time (ms)|Requests Per Second|Response Time Avg (ms)|Response Time P99 (ms)|Read Response Time Avg (ms)|Read Response Time P99 (ms)|
 |-|-|-|-|-|-|-|-|-|-|-|
 |Node.js|SQLite|500|1|3000|950|3200|0.3|1|0.3|1|
+|Node.js|SQLite|10000|10|60000|5300|11000|0.8|2|0.7|2|
 |Node.js|SQLite|10000|100|60000|5000|12000|7|17|6|16|
 |Node.js|SQLite|10000|1000|60000|6100|9900|57|464|20|152|
 |Node.js|Memory|500|1|3000|825|3600|0.3|1|0.2|1|
@@ -56,6 +57,9 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 ```sh
 TEST_PARALLEL=1 TEST_LIMIT=500 ./scripts/performance-test/run.js
 # {"timestamp":"2025-07-23T06:23:29.885Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":500,"TEST_PARALLEL":1,"N_BATCHES":500,"testCount":{"error":0,"success":500,"total":500},"testElapsed":{"count":500,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":500,"min":0,"max":12,"avg":0.4,"p90":1,"p95":1,"p99":1},"readElapsed":{"count":1500,"min":0,"max":2,"avg":0.25266666666666665,"p90":1,"p95":1,"p99":1},"updateElapsed":{"count":500,"min":0,"max":3,"avg":0.394,"p90":1,"p95":1,"p99":1},"deleteElapsed":{"count":500,"min":0,"max":2,"avg":0.31,"p90":1,"p95":1,"p99":1},"requestElapsed":{"count":3000,"min":0,"max":12,"avg":0.31033333333333335,"p90":1,"p95":1,"p99":1},"requests":{"totalCount":3000,"countPerSecond":3151.2605042016808},"elapsedTotal":952}
+
+TEST_PARALLEL=10 ./scripts/performance-test/run.js
+# {"timestamp":"2025-07-25T17:50:34.750Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":10,"N_BATCHES":1000,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":0,"max":27,"avg":1.2225,"p90":2,"p95":2,"p99":3},"readElapsed":{"count":30000,"min":0,"max":5,"avg":0.6598333333333334,"p90":1,"p95":2,"p99":2},"updateElapsed":{"count":10000,"min":0,"max":5,"avg":0.8007,"p90":1,"p95":2,"p99":2},"deleteElapsed":{"count":10000,"min":0,"max":5,"avg":0.5473,"p90":1,"p95":1,"p99":2},"requestElapsed":{"count":60000,"min":0,"max":27,"avg":0.7583333333333333,"p90":1,"p95":2,"p99":2},"requests":{"totalCount":60000,"countPerSecond":11355.034065102196},"elapsedTotal":5284}
 
 TEST_PARALLEL=100 ./scripts/performance-test/run.js
 # {"timestamp":"2025-07-23T06:21:42.687Z","level":"INFO","message":"Finished performance test","TEST_LIMIT":10000,"TEST_PARALLEL":100,"N_BATCHES":100,"testCount":{"error":0,"success":10000,"total":10000},"testElapsed":{"count":10000,"min":0,"max":0,"avg":0,"p90":0,"p95":0,"p99":0},"createElapsed":{"count":10000,"min":3,"max":102,"avg":9.3115,"p90":14,"p95":15,"p99":29},"readElapsed":{"count":30000,"min":0,"max":31,"avg":6.399533333333333,"p90":11,"p95":12,"p99":16},"updateElapsed":{"count":10000,"min":1,"max":26,"avg":9.0198,"p90":12,"p95":14,"p99":18},"deleteElapsed":{"count":10000,"min":0,"max":18,"avg":5.1821,"p90":8,"p95":9,"p99":11},"requestElapsed":{"count":60000,"min":0,"max":102,"avg":7.118666666666667,"p90":12,"p95":13,"p99":17},"requests":{"totalCount":60000,"countPerSecond":11961.722488038278},"elapsedTotal":5016}
