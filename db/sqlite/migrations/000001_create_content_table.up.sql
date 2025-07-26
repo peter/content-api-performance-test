@@ -4,10 +4,10 @@ CREATE TABLE IF NOT EXISTS content (
     body TEXT NOT NULL,
     author TEXT NOT NULL,
     status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
-    data JSON NOT NULL DEFAULT '{}', -- JSON data column
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+    data TEXT, -- JSON data column
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+) STRICT;
 
 CREATE INDEX idx_content_status ON content(status);
 CREATE INDEX idx_content_author ON content(author);

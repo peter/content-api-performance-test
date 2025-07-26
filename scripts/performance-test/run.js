@@ -49,6 +49,18 @@ function stats(values) {
     }
 }
 
+function assertRecentDate(date) {
+    if (!date || isNaN(date.getTime())) {
+        throw new Error(`Invalid date: ${date}`)
+    }
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const diffSeconds = diff / 1000
+    if (diffSeconds > 10) {
+        throw new Error(`Date is too old: ${date} (diff: ${diffSeconds}s)`)
+    }
+}
+
 async function runTest(batchIndex, index) {
     const runId = `${batchIndex}-${index}-${Math.random().toString(36).substring(2, 15)}`
     const testStartTime = Date.now()
@@ -82,6 +94,7 @@ async function runTest(batchIndex, index) {
     assert.strictEqual(response.data.body, content.body)
     assert.strictEqual(response.data.author, content.author)
     assert.strictEqual(response.data.status, content.status)
+    assertRecentDate(new Date(response.data.created_at))
     if (TEST_DATA_FIELD) {
         assert.strictEqual(response.data.data.run_id, runId)
         assert.strictEqual(response.data.data.created_at, createdAt)
@@ -102,6 +115,7 @@ async function runTest(batchIndex, index) {
     requestElapsed.read.push(Date.now() - startTime)
     assert.strictEqual(response.data.id, id)
     assert.strictEqual(response.data.title, `${content.title} (updated)`)
+    assertRecentDate(new Date(response.data.updated_at))
 
     // DELETE
     startTime = Date.now()
