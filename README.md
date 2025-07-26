@@ -405,6 +405,8 @@ mix ecto.reset
 
 ## Resources
 
+* [Appropriate Uses For SQLite](https://www.sqlite.org/whentouse.html)
+
 * [go-sqlite3 - SQLite Library](https://github.com/mattn/go-sqlite3)
 * [pgx - Postgres Library](https://github.com/jackc/pgx)
 * [WAL File Size Issue with SQLite](https://news.ycombinator.com/item?id=40688987)
