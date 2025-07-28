@@ -8,6 +8,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8888';
 const TEST_LIMIT = parseInt(process.env.TEST_LIMIT || 10_000)
 const TEST_PARALLEL = parseInt(process.env.TEST_PARALLEL || 100)
 const TEST_DATA_FIELD = process.env.TEST_DATA_FIELD !== 'false'
+const TEST_CREATE_ONLY = process.env.TEST_CREATE_ONLY === 'true'
 
 const LOG_LEVELS = ['DEBUG', 'INFO', 'ERROR']
 const LOG_LEVEL = (process.env.LOG_LEVEL || 'DEBUG').toUpperCase()
@@ -85,47 +86,49 @@ async function runTest(batchIndex, index) {
     requestElapsed.create.push(Date.now() - startTime)
     const id = response.data.id
 
-    // READ
-    startTime = Date.now()
-    response = await axios.get(`${BASE_URL}/content/${id}`)
-    requestElapsed.read.push(Date.now() - startTime)
-    assert.strictEqual(response.data.id, id)
-    assert.strictEqual(response.data.title, content.title)
-    assert.strictEqual(response.data.body, content.body)
-    assert.strictEqual(response.data.author, content.author)
-    assert.strictEqual(response.data.status, content.status)
-    assertRecentDate(new Date(response.data.created_at))
-    if (TEST_DATA_FIELD) {
-        assert.strictEqual(response.data.data.run_id, runId)
-        assert.strictEqual(response.data.data.created_at, createdAt)
+    if (!TEST_CREATE_ONLY) {
+        // READ
+        startTime = Date.now()
+        response = await axios.get(`${BASE_URL}/content/${id}`)
+        requestElapsed.read.push(Date.now() - startTime)
+        assert.strictEqual(response.data.id, id)
+        assert.strictEqual(response.data.title, content.title)
+        assert.strictEqual(response.data.body, content.body)
+        assert.strictEqual(response.data.author, content.author)
+        assert.strictEqual(response.data.status, content.status)
+        assertRecentDate(new Date(response.data.created_at))
+        if (TEST_DATA_FIELD) {
+            assert.strictEqual(response.data.data.run_id, runId)
+            assert.strictEqual(response.data.data.created_at, createdAt)
+        }
+
+        // UPDATE
+        startTime = Date.now()
+        await axios.put(`${BASE_URL}/content/${id}`, {
+            ...content,
+            status: "published",
+            title: `${content.title} (updated)`,
+        })
+        requestElapsed.update.push(Date.now() - startTime)
+
+        // READ
+        startTime = Date.now()
+        response = await axios.get(`${BASE_URL}/content/${id}`)
+        requestElapsed.read.push(Date.now() - startTime)
+        assert.strictEqual(response.data.id, id)
+        assert.strictEqual(response.data.title, `${content.title} (updated)`)
+        assertRecentDate(new Date(response.data.updated_at))
+
+        // DELETE
+        startTime = Date.now()
+        await axios.delete(`${BASE_URL}/content/${id}`)
+        requestElapsed.delete.push(Date.now() - startTime)
+
+        // READ
+        startTime = Date.now()
+        await axios.get(`${BASE_URL}/content/${id}`, { validateStatus: (status) => status === 404 })
+        requestElapsed.read.push(Date.now() - startTime)
     }
-
-    // UPDATE
-    startTime = Date.now()
-    await axios.put(`${BASE_URL}/content/${id}`, {
-        ...content,
-        status: "published",
-        title: `${content.title} (updated)`,
-    })
-    requestElapsed.update.push(Date.now() - startTime)
-
-    // READ
-    startTime = Date.now()
-    response = await axios.get(`${BASE_URL}/content/${id}`)
-    requestElapsed.read.push(Date.now() - startTime)
-    assert.strictEqual(response.data.id, id)
-    assert.strictEqual(response.data.title, `${content.title} (updated)`)
-    assertRecentDate(new Date(response.data.updated_at))
-
-    // DELETE
-    startTime = Date.now()
-    await axios.delete(`${BASE_URL}/content/${id}`)
-    requestElapsed.delete.push(Date.now() - startTime)
-
-    // READ
-    startTime = Date.now()
-    await axios.get(`${BASE_URL}/content/${id}`, { validateStatus: (status) => status === 404 })
-    requestElapsed.read.push(Date.now() - startTime)
 
     return {
         testElapsed: Date.now() - testStartTime,
