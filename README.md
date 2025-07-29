@@ -51,11 +51,11 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 
 Here are some server response time stats (i.e. response time minus network latency) for different hosting providers:
 
-|Runtime|Database|Hosting Provider|Number of Tests| Test Concurrency|Number of Requests|Server Response Time Avg (ms)|Server Response Time P99 (ms)|
-|-|-|-|-|-|-|-|-|
-|Node.js|Postgres|Fly.io with 1024 MB postgres machine|10000|100|60000|8|32|
-|Node.js|Postgres|Hetzner ubuntu-4gb-hel1-1 2 vcpu cloud server|10000|100|60000|14|30|
-|Haskell/PostgREST|Postgres|Supabase|10000|100|60000|47|162|
+|Runtime|Database|Hosting Provider|Location/Region|Number of Tests| Test Concurrency|Number of Requests|Server Response Time Avg (ms)|Server Response Time P99 (ms)|Total Response Time Avg (ms)|Total Response Time P99 (ms)|
+|-|-|-|-|-|-|-|-|-|-|-|
+|Node.js|Postgres|Fly.io with 1024 MB postgres machine|ARN/Stockholm|10000|100|60000|8|32|34|98|
+|Node.js|Postgres|Hetzner ubuntu-4gb-hel1-1 2 vcpu cloud server|Finland|10000|100|60000|14|30|34|69|
+|Haskell/PostgREST|Postgres|Supabase|eu-north-1|10000|100|60000|47|162|85|212|
 
 ## Performance Test Results: Node.js REST API with SQLite
 
