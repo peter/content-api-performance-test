@@ -12,6 +12,7 @@ const TEST_DATA_FIELD = process.env.TEST_DATA_FIELD !== 'false'
 const TEST_CREATE_ONLY = process.env.TEST_CREATE_ONLY === 'true'
 const TEST_SUPABASE = process.env.TEST_SUPABASE === 'true'
 const TEST_HEADERS = process.env.TEST_HEADERS ? JSON.parse(process.env.TEST_HEADERS) : undefined
+const TEST_RESPONSE_TIME_HEADER = process.env.TEST_RESPONSE_TIME_HEADER || 'x-response-time'
 
 const LOG_LEVELS = ['DEBUG', 'INFO', 'ERROR']
 const LOG_LEVEL = (process.env.LOG_LEVEL || 'DEBUG').toUpperCase()
@@ -121,8 +122,8 @@ async function runTest(batchIndex, index) {
     let startTime = Date.now()
     let response = await axios.post(`${BASE_URL}/content`, content, { headers })
     requestElapsed.create.push(Date.now() - startTime)
-    if (response.headers['x-response-time']) {
-        serverElapsed.create.push(Number(response.headers['x-response-time']))
+    if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
+        serverElapsed.create.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
     }
     const id = response.data.id || content.id
 
@@ -131,8 +132,8 @@ async function runTest(batchIndex, index) {
         startTime = Date.now()
         response = await getContent(id, { headers })
         requestElapsed.read.push(Date.now() - startTime)
-        if (response.headers['x-response-time']) {
-            serverElapsed.read.push(Number(response.headers['x-response-time']))
+        if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
+            serverElapsed.read.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
         }
         assert.strictEqual(response.data.id, id)
         assert.strictEqual(response.data.title, content.title)
@@ -153,16 +154,16 @@ async function runTest(batchIndex, index) {
             title: `${content.title} (updated)`,
         }, { headers })
         requestElapsed.update.push(Date.now() - startTime)
-        if (response.headers['x-response-time']) {
-            serverElapsed.update.push(Number(response.headers['x-response-time']))
+        if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
+            serverElapsed.update.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
         }
 
         // READ
         startTime = Date.now()
         response = await getContent(id, { headers })
         requestElapsed.read.push(Date.now() - startTime)
-        if (response.headers['x-response-time']) {
-            serverElapsed.read.push(Number(response.headers['x-response-time']))
+        if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
+            serverElapsed.read.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
         }
         assert.strictEqual(response.data.id, id)
         assert.strictEqual(response.data.title, `${content.title} (updated)`)
@@ -172,8 +173,8 @@ async function runTest(batchIndex, index) {
         startTime = Date.now()
         response = await deleteContent(id, { headers })
         requestElapsed.delete.push(Date.now() - startTime)
-        if (response.headers['x-response-time']) {
-            serverElapsed.delete.push(Number(response.headers['x-response-time']))
+        if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
+            serverElapsed.delete.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
         }
 
         // READ
@@ -185,8 +186,8 @@ async function runTest(batchIndex, index) {
             assert.strictEqual(response.status, 404)
         }
         requestElapsed.read.push(Date.now() - startTime)
-        if (response.headers['x-response-time']) {
-            serverElapsed.read.push(Number(response.headers['x-response-time']))
+        if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
+            serverElapsed.read.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
         }
     }
 

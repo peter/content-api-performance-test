@@ -49,6 +49,14 @@ The numbers below should be considered rough estimations (ballpark figures) and 
 |Elixir/Phoenix|Postgres|10000|100|60000|29900|2004|43|107|51|118|
 |Ruby on Rails|SQLite|400|80|2400|30000|79|500|5700|4|13|
 
+Here are some server response time stats (i.e. response time minus network latency) for different hosting providers:
+
+|Runtime|Database|Hosting Provider|Number of Tests| Test Concurrency|Number of Requests|Server Response Time Avg (ms)|Server Response Time P99 (ms)|
+|-|-|-|-|-|-|-|-|
+|Node.js|Postgres|Fly.io with 1024 MB postgres machine|10000|100|60000|8|32|
+|Node.js|Postgres|Hetzner ubuntu-4gb-hel1-1 2 vcpu cloud server|10000|100|60000|14|30|
+|Haskell/PostgREST|Postgres|Supabase|10000|100|60000|47|162|
+
 ## Performance Test Results: Node.js REST API with SQLite
 
 * Repo: https://github.com/peter/content-api-performance-test
