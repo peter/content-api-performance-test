@@ -228,8 +228,8 @@ fastify.get('/content', async (request, reply) => {
 // GET /content/:id - Get content by ID
 fastify.get('/content/:id', getContentSchema, async (request, reply) => {
   const { id } = request.params;
-  
-  fastify.log.info('Fetching content by ID', { content_id: id });
+
+  fastify.log.info({ content_id: id }, 'Fetching content by ID');
 
   try {
     const content = await contentStore.getById(id);

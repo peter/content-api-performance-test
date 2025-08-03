@@ -32,7 +32,7 @@ export class PostgresContentStore {
     `;
 
         try {
-            await this.pool.query(query, [
+            const _result = await this.pool.query(query, [
                 content.id,
                 content.title,
                 content.body,
@@ -43,7 +43,7 @@ export class PostgresContentStore {
                 content.updated_at,
             ]);
         } catch (error) {
-            throw new Error(`Failed to create content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw new Error(`Failed to create content: ${error instanceof Error ? error.message : error}`);
         }
     }
 
@@ -157,8 +157,8 @@ const dbConfig = {
   
 // Factory function to create ContentStore instances
 export function createContentStore() {
-    console.log('Creating PostgresContentStore')
     const connString = `postgresql://${dbConfig.user}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
+    console.log('Creating PostgresContentStore', connString)
     return new PostgresContentStore(
         connString,
         dbConfig.maxConns || 50,

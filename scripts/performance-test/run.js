@@ -69,10 +69,10 @@ function assertRecentDate(date) {
 async function getContent(id, options = {}) {
     if (TEST_SUPABASE) {
         const response = await axios.get(`${BASE_URL}/content?id=eq.${id}`, options)
-        return { headers: response.headers, data: response.data?.[0] }
+        return { status: response.status, headers: response.headers, data: response.data?.[0] }
     } else {
         const response = await axios.get(`${BASE_URL}/content/${id}`, options)
-        return { headers: response.headers, data: response.data }
+        return { status: response.status, headers: response.headers, data: response.data }
     }
 }
 
@@ -179,7 +179,7 @@ async function runTest(batchIndex, index) {
 
         // READ
         startTime = Date.now()        
-        response = await getContent(id, { headers })
+        response = await getContent(id, { headers, validateStatus: () => true })
         if (TEST_SUPABASE) {
             assert.strictEqual(response.data, undefined)
         } else {
