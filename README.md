@@ -6,7 +6,7 @@ The initial motivation for these performance tests was to figure out if you can 
 
 ## Performance Test Results Summary
 
-The [test runner](scripts/performance-test/run.js) is written in JavaScript and issues HTTP requests against a web server running on localhost on port 8888. The script will execute a certain number of tests in parallel (i.e. 100) and each test executes the following sequence of HTTP requests:
+The [test runner](scripts/performance-test/run.js) is written in JavaScript and issues HTTP requests against a web server (by default the server is running on localhost on port 8888 but it could also be running the cloud, see more below). The script will execute a certain number of tests in parallel (i.e. 100) and each test executes the following sequence of HTTP requests:
 
 1. POST /content
 2. GET /content/:id
