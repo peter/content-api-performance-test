@@ -4,7 +4,7 @@ The initial motivation for these performance tests was to figure out if you can 
 
 ## Findings
 
-**SQLite: on my M1 Macbook laptop Node.js with either SQLite or Postgres can do around 10k read and write queries per second with a p99 response time of around 20 ms and request concurrency level of 100. This should be more than sufficient for most applications.**
+**SQLite: on my M1 Macbook laptop Node.js with either SQLite can do around 10k read and write queries per second with a p99 response time of around 20 ms and request concurrency level of 100. This should be more than sufficient for most applications.**
 
 **Postgres: When running locally I was able to get very good numbers for Postgres (and they were strikingly similar to those for SQLite). However, when running Postgres in the cloud (AWS/GCP/Supabase etc.) response times can slow down significantly depending on your database configuration and latency.**
 
