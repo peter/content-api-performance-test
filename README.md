@@ -55,7 +55,7 @@ Here are some server response time stats (i.e. response time minus network laten
 |-|-|-|-|-|-|-|-|-|-|-|
 |Node.js|Postgres|Fly.io with 1024 MB postgres machine|ARN/Stockholm|10000|100|60000|8|32|34|98|
 |Node.js|Postgres|Hetzner ubuntu-4gb-hel1-1 2 vcpu cloud server|Finland|10000|100|60000|14|30|34|69|
-|Node.js|Postgres|AWS Kubernetes with 2 App Servers talking to Aurora DB|eu-north-1|10000|100|60000|19|107|128|374|
+|Node.js|Postgres|AWS Kubernetes with 2 App Servers (pg pool size 10 or 50) talking to Aurora DB|eu-north-1|10000|100|60000|19|107|128|374|
 |Haskell/PostgREST|Postgres|Supabase|eu-north-1|10000|100|60000|47|162|85|212|
 
 ## Performance Test Results: Node.js REST API with SQLite
