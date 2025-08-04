@@ -57,6 +57,7 @@ Here are some server response time stats (i.e. response time minus network laten
 |Node.js|Postgres|Hetzner ubuntu-4gb-hel1-1 2 vcpu cloud server|Finland|10000|100|60000|14|30|34|69|
 |Node.js|Postgres|AWS Kubernetes with 2 App Servers (pg pool size 10 or 50) talking to Aurora DB|eu-north-1|10000|100|60000|19|107|128|374|
 |Haskell/PostgREST|Postgres|Supabase|eu-north-1|10000|100|60000|47|162|85|212|
+|Node.js|Postgres|GCP Kubernetes with 3 App Servers (pg pool size 30) talking to Cloud SQL DB with 4 VCPU and 16 GB Memory|europe-west1|1000|100|6000|469|2690|1650|6496|
 
 ## Performance Test Results: Node.js REST API with SQLite
 
