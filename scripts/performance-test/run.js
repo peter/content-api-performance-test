@@ -96,6 +96,15 @@ async function deleteContent(id, options = {}) {
     }
 }
 
+function getServerElapsed(headers) {
+    const responseTime = headers[TEST_RESPONSE_TIME_HEADER]
+    if (!responseTime) {
+        return undefined
+    }
+    const numberString = responseTime.replace(/ms$/, '')
+    return Number(numberString)
+}
+
 async function runTest(batchIndex, index) {
     const runId = `${batchIndex}-${index}-${Math.random().toString(36).substring(2, 15)}`
     const testStartTime = Date.now()
@@ -123,7 +132,7 @@ async function runTest(batchIndex, index) {
     let response = await axios.post(`${BASE_URL}/content`, content, { headers })
     requestElapsed.create.push(Date.now() - startTime)
     if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
-        serverElapsed.create.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
+        serverElapsed.create.push(getServerElapsed(response.headers))
     }
     const id = response.data.id || content.id
 
@@ -133,7 +142,7 @@ async function runTest(batchIndex, index) {
         response = await getContent(id, { headers })
         requestElapsed.read.push(Date.now() - startTime)
         if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
-            serverElapsed.read.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
+            serverElapsed.read.push(getServerElapsed(response.headers))
         }
         assert.strictEqual(response.data.id, id)
         assert.strictEqual(response.data.title, content.title)
@@ -155,7 +164,7 @@ async function runTest(batchIndex, index) {
         }, { headers })
         requestElapsed.update.push(Date.now() - startTime)
         if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
-            serverElapsed.update.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
+            serverElapsed.update.push(getServerElapsed(response.headers))
         }
 
         // READ
@@ -163,7 +172,7 @@ async function runTest(batchIndex, index) {
         response = await getContent(id, { headers })
         requestElapsed.read.push(Date.now() - startTime)
         if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
-            serverElapsed.read.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
+            serverElapsed.read.push(getServerElapsed(response.headers))
         }
         assert.strictEqual(response.data.id, id)
         assert.strictEqual(response.data.title, `${content.title} (updated)`)
@@ -174,7 +183,7 @@ async function runTest(batchIndex, index) {
         response = await deleteContent(id, { headers })
         requestElapsed.delete.push(Date.now() - startTime)
         if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
-            serverElapsed.delete.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
+            serverElapsed.delete.push(getServerElapsed(response.headers))
         }
 
         // READ
@@ -187,7 +196,7 @@ async function runTest(batchIndex, index) {
         }
         requestElapsed.read.push(Date.now() - startTime)
         if (response.headers[TEST_RESPONSE_TIME_HEADER]) {
-            serverElapsed.read.push(Number(response.headers[TEST_RESPONSE_TIME_HEADER]))
+            serverElapsed.read.push(getServerElapsed(response.headers))
         }
     }
 
